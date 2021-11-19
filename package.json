@@ -4,7 +4,8 @@
 	"description": "shop kinh doanh phu kien laptop",
 	"main": "app.js",
 	"scripts": {
-		"start": "nodemon server.js",
+		"start": "node server.js",
+		"dev": "nodemon server.js",
 		"start:prod": "SET NODE_ENV=production&& nodemon server.js",
 		"debug": "SET NODE_ENV=production && ndb server.js"
 	},
@@ -15,6 +16,7 @@
 		"cors": "^2.8.5",
 		"dotenv": "^10.0.0",
 		"express": "^4.17.1",
+		"heroku": "^7.59.2",
 		"jsonwebtoken": "^8.5.1",
 		"mongoose": "^6.0.12",
 		"morgan": "^1.10.0",
@@ -23,5 +25,8 @@
 		"nodemon": "^2.0.14",
 		"slugify": "^1.6.1",
 		"validator": "^13.7.0"
+	},
+	"engines": {
+		"node": ">=10.0.0"
 	}
 }
