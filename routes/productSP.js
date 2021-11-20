@@ -17,7 +17,7 @@ router.post(
 	authController.restrictTo("assistant"),
 	createProduct
 );
-router.get("/getProductsId/:id", authController.protect, getProductsById);
+router.get("/getProductsId/:id", getProductsById);
 router.get("/getProductDetail/:id", authController.protect, getProductDetail);
 router.patch(
 	"/updateProductById/:id",
