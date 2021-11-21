@@ -18,7 +18,7 @@ router.post(
 	createProduct
 );
 router.get("/getProductsId/:id", getProductsById);
-router.get("/getProductDetail/:id", authController.protect, getProductDetail);
+router.get("/getProductDetail/:id", getProductDetail);
 router.patch(
 	"/updateProductById/:id",
 	authController.protect,

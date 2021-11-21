@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const AppError = require("./utils/appError");
+const compression = require("compression");
 const globalErrorHandler = require("./controllers/errorController");
 const productRouter = require("./routes/productRoutes");
 const userRouter = require("./routes/userRoutes");
@@ -21,6 +22,7 @@ app.use(express.static(`${__dirname}/public`));
 
 //middleware for parsing request body to json
 app.use(express.json());
+app.use(compression());
 
 //middleware for tour, user router
 app.use("/api/v1/products", productRouter);
