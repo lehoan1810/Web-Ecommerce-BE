@@ -136,11 +136,12 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 	// 3) send it to user's email
 
 	try {
-		const resetURL = `${req.protocol}://${req.get(
-			"host"
-		)}/api/v1/users/resetPassword/${resetToken}`;
+		// const resetURL = `${req.protocol}://${req.get(
+		// 	"host"
+		// )}/api/v1/users/resetPassword/${resetToken}`;
+		const RESETURL = `https://hqh-shop.vercel.app/resetPassword/${resetToken}`;
 
-		await new Email(user, resetURL).sendPasswordReset();
+		await new Email(user, RESETURL).sendPasswordReset();
 
 		res.status(200).json({
 			status: "success",
