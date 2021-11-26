@@ -63,6 +63,7 @@ sendProdError = (err, res) => {
 		// 2) Send generic message
 		res.status(500).json({
 			status: "error",
+			error: err,
 			message: "Something went very wrong! @.@",
 		});
 	}
