@@ -1,5 +1,6 @@
 const Category = require("../models/category");
 const slugify = require("slugify");
+const catchAsync = require("./../utils/catchAsync");
 
 const createCategories = (categories, parentId = null) => {
 	const categoryList = [];
