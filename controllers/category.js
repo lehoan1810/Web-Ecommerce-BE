@@ -66,3 +66,11 @@ exports.getAllBrand = (req, res) => {
 		}
 	});
 };
+
+exports.deleteCategory = catchAsync(async (req, res, next) => {
+	const category = await Category.findByIdAndDelete(req.params.id);
+	console.log(category);
+	res.status(200).json({
+		status: "xóa category thành công",
+	});
+});
