@@ -262,7 +262,7 @@ userSchema.methods.addToCart = async function (productId, qtyy) {
 
 //method to decrease cart
 userSchema.methods.decreaseFromCart = async function (productId, qtyy) {
-	await alidateCart(this);
+	await validateCart(this);
 
 	//set totalPrice is 0 if no items in cart
 	if (this.cart.items.length === 0) {
