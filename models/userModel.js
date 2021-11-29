@@ -4,97 +4,141 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const Product = require("./../models/productSP");
 const AppError = require("../utils/appError");
+const validateCart = require("./../utils/validateCart");
 
-const userSchema = new mongoose.Schema({
-	name: {
-		type: String,
-		require: [true, "Please give us your name"],
-	},
-	email: {
-		type: String,
-		require: [true, "Please give us your email"],
-		unique: [true, "Email must be unique"],
-		lowercase: true,
-		validate: [validator.isEmail, "Please provide a valid email"],
-	},
-	password: {
-		type: String,
-		require: [true, "Please provide us your password"],
-		minlength: [8, "Password must be at least 8 characters"],
-		select: false, //make this field is not visible in any output
-	},
-	passwordConfirm: {
-		type: String,
-		require: [true, "Please confirm your password"],
-		validate: {
-			validator: function (elm) {
-				return elm === this.password;
-			},
-			message: "Passwords are not the same",
+const userSchema = new mongoose.Schema(
+	{
+		name: {
+			type: String,
+			require: [true, "Please give us your name"],
 		},
-	},
-	photo: {
-		type: String,
-		default: "",
-	},
-	address: {
-		type: String,
-		default: "",
-	},
-	phone: {
-		type: String,
-		default: "",
-	},
-	gender: {
-		type: String,
-		default: "",
-	},
+		email: {
+			type: String,
+			require: [true, "Please give us your email"],
+			unique: [true, "Email must be unique"],
+			lowercase: true,
+			validate: [validator.isEmail, "Please provide a valid email"],
+		},
+		password: {
+			type: String,
+			require: [true, "Please provide us your password"],
+			minlength: [8, "Password must be at least 8 characters"],
+			select: false, //make this field is not visible in any output
+		},
+		passwordConfirm: {
+			type: String,
+			require: [true, "Please confirm your password"],
+			validate: {
+				validator: function (elm) {
+					return elm === this.password;
+				},
+				message: "Passwords are not the same",
+			},
+		},
+		photo: {
+			type: String,
+			default: "",
+		},
+		address: {
+			type: String,
+			default: "",
+		},
+		phone: {
+			type: String,
+			default: "",
+		},
+		gender: {
+			type: String,
+			default: "",
+		},
 
-	role: {
-		type: String,
-		enum: ["customer", "assistant", "admin"],
-		default: "customer",
-	},
-	passwordChangedAt: Date,
-	passwordResetToken: String,
-	passwordResetExpires: Date,
-	active: {
-		type: Boolean,
-		default: true,
-		select: false,
-	},
+		role: {
+			type: String,
+			enum: ["customer", "assistant", "admin"],
+			default: "customer",
+		},
+		passwordChangedAt: Date,
+		passwordResetToken: String,
+		passwordResetExpires: Date,
+		active: {
+			type: Boolean,
+			default: true,
+			select: false,
+		},
 
-	//chỉnh sửa
-	cart: {
-		items: [
+		//chỉnh sửa
+		cart: {
+			items: [
+				{
+					productId: {
+						type: mongoose.Types.ObjectId,
+						ref: "productSP",
+						required: true,
+					},
+					price: {
+						type: Number,
+						required: true,
+					},
+					nameProduct: {
+						type: String,
+						required: true,
+					},
+					productPicture: {
+						type: String,
+						required: true,
+					},
+					qty: {
+						type: Number,
+						required: true,
+					},
+				},
+			],
+			totalPrice: { type: Number },
+		},
+		//
+		purchasingHistory: [
 			{
-				productId: {
-					type: mongoose.Types.ObjectId,
-					ref: "productSP",
-					required: true,
+				date: {
+					type: Date,
+					default: Date.now,
 				},
-				price: {
-					type: Number,
-					required: true,
-				},
-				nameProduct: {
+				items: [
+					{
+						productId: {
+							type: mongoose.Types.ObjectId,
+							ref: "productSP",
+							required: true,
+						},
+						productName: {
+							type: String,
+						},
+						price: {
+							type: Number,
+							required: true,
+						},
+						qty: {
+							type: Number,
+							required: true,
+						},
+					},
+				],
+				name: {
 					type: String,
-					required: true,
 				},
-				productPicture: {
+				shippingAddress: {
 					type: String,
-					required: true,
 				},
-				qty: {
+				totalPrice: {
 					type: Number,
-					required: true,
 				},
 			},
 		],
-		totalPrice: { type: Number },
 	},
-	//
-});
+	{
+		toJSON: { virtuals: true },
+		toObject: { virtuals: true },
+	}
+);
 
 // userSchema.pre("save", async function (next) {}),
 //hash password before actually saving to the db
@@ -172,8 +216,17 @@ userSchema.methods.createResetPasswordToken = function () {
 	return resetToken;
 };
 
+//
+//method to validate cart
+userSchema.methods.getCart = async function () {
+	await validateCart(this);
+
+	return await this.save();
+};
+
 //method to addToCart
 userSchema.methods.addToCart = async function (productId, qtyy) {
+	await validateCart(this);
 	const product = await Product.findById(productId);
 
 	if (product) {
@@ -187,6 +240,7 @@ userSchema.methods.addToCart = async function (productId, qtyy) {
 		if (isExisting >= 0) {
 			this.cart.items[isExisting].qty += qtyy;
 			this.cart.items[isExisting].price = product.price;
+			this.cart.items[isExisting].nameProduct = product.name;
 		}
 		//if not
 		else {
@@ -201,13 +255,20 @@ userSchema.methods.addToCart = async function (productId, qtyy) {
 		if (!this.cart.totalPrice) {
 			this.cart.totalPrice = 0;
 		}
-		this.cart.totalPrice += product.price;
+		this.cart.totalPrice += product.price * qtyy;
 		return await this.save();
 	}
 };
 
 //method to decrease cart
 userSchema.methods.decreaseFromCart = async function (productId, qtyy) {
+	await alidateCart(this);
+
+	//set totalPrice is 0 if no items in cart
+	if (this.cart.items.length === 0) {
+		this.cart.totalPrice = 0;
+	}
+
 	const product = await Product.findById(productId);
 	//check if passed product has in current cart
 	if (product) {
@@ -221,7 +282,12 @@ userSchema.methods.decreaseFromCart = async function (productId, qtyy) {
 			//check if qty of product is greater than 1, if so, decrease the qty & update the totalPrice
 			if (this.cart.items[isExisting].qty > 1) {
 				this.cart.items[isExisting].qty -= qtyy;
-				// this.cart.totalPrice -= this.cart.items[isExisting].price;
+				this.cart.totalPrice -= this.cart.items[isExisting].price;
+
+				//set totalPrice is 0 if no items in cart
+				if (this.cart.items.length === 0) {
+					this.cart.totalPrice = 0;
+				}
 				return await this.save();
 			}
 			//if not (<=1), go to this.removeFromCart
@@ -234,6 +300,10 @@ userSchema.methods.decreaseFromCart = async function (productId, qtyy) {
 
 //method to remove cart
 userSchema.methods.removeFromCart = async function (productId) {
+	await validateCart(this);
+	if (this.cart.items.length === 0) {
+		this.cart.totalPrice = 0;
+	}
 	const isExisting = this.cart.items.findIndex(
 		(item) => new String(item.productId).trim() === new String(productId).trim()
 	);
@@ -243,6 +313,11 @@ userSchema.methods.removeFromCart = async function (productId) {
 		this.cart.totalPrice -=
 			this.cart.items[isExisting].price * this.cart.items[isExisting].qty;
 		this.cart.items.splice(isExisting, 1);
+
+		//set totalPrice is 0 if no items in cart
+		if (this.cart.items.length === 0) {
+			this.cart.totalPrice = 0;
+		}
 		return await this.save();
 	}
 };

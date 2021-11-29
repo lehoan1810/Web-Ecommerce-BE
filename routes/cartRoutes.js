@@ -36,30 +36,4 @@ router
 		cartController.deleteCart
 	);
 
-// router
-// 	.route('/:cartId')
-// 	.patch(
-// 		authController.protect,
-// 		authController.restrictTo('customer'),
-// 		cartController.addToCart
-// 	);
-
-// 2) FOR ADMIN
-// router
-// 	.route('/')
-// 	.get(
-// 		authController.protect,
-// 		authController.restrictTo('admin', 'assistant'),
-// 		cartController.getAllCarts
-// 	);
-
-// router
-// 	.route('/:cardId')
-// 	.get(
-// 		authController.protect,
-// 		authController.restrictTo('admin', 'assistant'),
-// 		cartController.getCart
-// 	);
-
-//export for using in app
 module.exports = router;

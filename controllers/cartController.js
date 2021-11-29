@@ -1,6 +1,7 @@
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("./../utils/appError");
 const Product = require("../models/productModel");
+const User = require("../models/userModel");
 
 // 1) FOR CUSTOMER
 exports.addToCart = catchAsync(async (req, res, next) => {
@@ -15,12 +16,16 @@ exports.addToCart = catchAsync(async (req, res, next) => {
 });
 
 exports.getCart = catchAsync(async (req, res, next) => {
-	const cart = await req.user.populate("cart.items.productId");
+	// const cart = await req.user.populate("cart.items.productId");
+	let user = await User.findById(req.user.id);
+	const uptodateUserCart = await user.getCart();
+	user = uptodateUserCart;
+	await user.save();
 
 	res.status(200).json({
 		status: "success",
 		data: {
-			doc: cart,
+			doc: user.cart,
 		},
 	});
 });
