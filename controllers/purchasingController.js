@@ -21,9 +21,9 @@ let user = {};
 
 exports.purchase = catchAsync(async (req, res, next) => {
 	// 1) Lấy thông tin user và thông tin giỏ hàng
-	user = await User.findById(req.user.id);
+	// user = await User.findById(req.user.id);
+	user = await User.findById(req.params.userId);
 	console.log(user);
-	// user = await User.findById(req.params.userId);
 	const cart = user.cart;
 	const cartItems = cart.items;
 
