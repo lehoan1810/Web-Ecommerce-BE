@@ -16,8 +16,8 @@ router.get(
 //chỗ này để thực hiện các bước THANH TOÁN sau khi user bấm nút THANH TOÁN ở trên
 // prettier-ignore
 router.post(
-	'/id',
-	authController.protect,
+	"/",
+    authController.protect,
 	purchasingController.purchase
 );
 

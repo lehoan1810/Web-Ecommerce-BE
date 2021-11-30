@@ -34,8 +34,8 @@ app.post("/pay", function (req, res) {
 			payment_method: "paypal",
 		},
 		redirect_urls: {
-			return_url: "http://localhost:3000/success",
-			cancel_url: "http://localhost:3000/cancel",
+			return_url: "https://hqh-computer-mern.herokuapp.com/success",
+			cancel_url: "https://hqh-computer-mern.herokuapp.com/cancel",
 		},
 		transactions: [
 			{
