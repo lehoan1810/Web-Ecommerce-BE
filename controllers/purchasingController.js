@@ -44,7 +44,7 @@ exports.purchase = catchAsync(async (req, res, next) => {
 	let convertedItems = [];
 	cartItems.forEach((item) => {
 		convertedItems.push({
-			name: item.productName,
+			name: item.nameProduct,
 			sku: item.productId + "",
 			price: Math.round(item.price / exchangeRate),
 			currency: "USD",
