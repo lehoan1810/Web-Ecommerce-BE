@@ -11,9 +11,9 @@ const axios = require("axios");
 paypal.configure({
 	mode: "sandbox", //sandbox or live
 	client_id:
-		"AWxTFB9e_bKvYjweAF5cvUeSCSEvgRPHsbY1ap1-U6sO16RzP8I3JPhoGMqKmzKITzbW82MdOvYYj-n3",
+		"AQiKeN030h5sXtw1TDOw0l7u4Bo8KINbSNFZCE-gSX4R0XenEyI6eQAcJcr0Oez_2JM74T5Dc9LvpW7n",
 	client_secret:
-		"EIDYSpstuOmwiR7bSeIQMrsCpEYJ7REfGMuWbrVfMWTF-LtUqbSupkvUIq5H8iGvGho5kdeB2mDc3BJr",
+		"ECBxsoE56ZVQyhBWR15KZ_Z0s18aRHaR9jrCposcw_Aj0GiRRjq1v3SmkfGB1JyGiBkklEfuQlbSoGuV",
 });
 
 let convertedTotalPrice = 0;
