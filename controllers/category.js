@@ -71,7 +71,11 @@ exports.getAllBrand = (req, res) => {
 exports.deleteCategory = catchAsync(async (req, res, next) => {
 	const category = await Category.findByIdAndDelete(req.params.id);
 	console.log(category);
+	if (!category) {
+		return next(new AppError(`No category found with this ID`, 404));
+	}
 	res.status(200).json({
 		status: "xóa category thành công",
+		data: null,
 	});
 });
