@@ -1,5 +1,4 @@
 const express = require("express");
-const purchasingController = require("../controllers/purchasingController");
 const authController = require("../controllers/authController");
 const { testPaypal, getSuccess, getCancel } = require("../controllers/Paypal");
 
@@ -19,8 +18,6 @@ router.post("/:id", testPaypal);
 
 //chỗ này để thực hiện các bước THANH TOÁN sau khi user bấm nút THANH TOÁN ở trên
 // prettier-ignore
-// router.post("/testt", purchasingController.purchase);
-// router.post("/:userId", purchasingController.purchase);
 
 // prettier-ignore
 router.get(

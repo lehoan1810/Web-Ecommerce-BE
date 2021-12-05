@@ -3,11 +3,9 @@ const cors = require("cors");
 const AppError = require("./utils/appError");
 const compression = require("compression");
 const globalErrorHandler = require("./controllers/errorController");
-const productRouter = require("./routes/productRoutes");
 const userRouter = require("./routes/userRoutes");
 const categoryRouters = require("./routes/category");
 const productRouters = require("./routes/productSP");
-const brandRouters = require("./routes/brand");
 const reviewRouter = require("./routes/reviewRoutes");
 const cartRouter = require("./routes/cartRoutes");
 const purchasingRouter = require("./routes/purchasingRoutes");
@@ -26,11 +24,9 @@ app.use(express.json());
 app.use(compression());
 
 //middleware for tour, user router
-app.use("/api/v1/products", productRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/category", categoryRouters);
 app.use("/api/v1/category", productRouters);
-app.use("/api/v1/category", brandRouters);
 app.use("/api/v1/reviews", reviewRouter);
 app.use("/api/v1/cart", cartRouter);
 
