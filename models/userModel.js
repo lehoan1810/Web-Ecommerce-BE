@@ -1,61 +1,61 @@
-const crypto = require("crypto");
-const mongoose = require("mongoose");
-const validator = require("validator");
-const bcrypt = require("bcryptjs");
-const Product = require("./../models/productSP");
-const AppError = require("../utils/appError");
-const validateCart = require("./../utils/validateCart");
+const crypto = require('crypto');
+const mongoose = require('mongoose');
+const validator = require('validator');
+const bcrypt = require('bcryptjs');
+const Product = require('./../models/productSP');
+const AppError = require('../utils/appError');
+const validateCart = require('./../utils/validateCart');
 
 const userSchema = new mongoose.Schema(
 	{
 		name: {
 			type: String,
-			require: [true, "Please give us your name"],
+			require: [true, 'Please give us your name'],
 		},
 		email: {
 			type: String,
-			require: [true, "Please give us your email"],
-			unique: [true, "Email must be unique"],
+			require: [true, 'Please give us your email'],
+			unique: [true, 'Email must be unique'],
 			lowercase: true,
-			validate: [validator.isEmail, "Please provide a valid email"],
+			validate: [validator.isEmail, 'Please provide a valid email'],
 		},
 		password: {
 			type: String,
-			require: [true, "Please provide us your password"],
-			minlength: [8, "Password must be at least 8 characters"],
+			require: [true, 'Please provide us your password'],
+			minlength: [8, 'Password must be at least 8 characters'],
 			select: false, //make this field is not visible in any output
 		},
 		passwordConfirm: {
 			type: String,
-			require: [true, "Please confirm your password"],
+			require: [true, 'Please confirm your password'],
 			validate: {
 				validator: function (elm) {
 					return elm === this.password;
 				},
-				message: "Passwords are not the same",
+				message: 'Passwords are not the same',
 			},
 		},
 		photo: {
 			type: String,
-			default: "",
+			default: '',
 		},
 		address: {
 			type: String,
-			default: "",
+			default: '',
 		},
 		phone: {
 			type: String,
-			default: "",
+			default: '',
 		},
 		gender: {
 			type: String,
-			default: "",
+			default: '',
 		},
 
 		role: {
 			type: String,
-			enum: ["customer", "assistant", "admin"],
-			default: "customer",
+			enum: ['customer', 'assistant', 'admin'],
+			default: 'customer',
 		},
 		passwordChangedAt: Date,
 		passwordResetToken: String,
@@ -72,7 +72,7 @@ const userSchema = new mongoose.Schema(
 				{
 					productId: {
 						type: mongoose.Types.ObjectId,
-						ref: "productSP",
+						ref: 'productSP',
 						required: true,
 					},
 					price: {
@@ -106,7 +106,7 @@ const userSchema = new mongoose.Schema(
 					{
 						productId: {
 							type: mongoose.Types.ObjectId,
-							ref: "productSP",
+							ref: 'productSP',
 							required: true,
 						},
 						productName: {
@@ -131,6 +131,10 @@ const userSchema = new mongoose.Schema(
 				totalPrice: {
 					type: Number,
 				},
+				status: {
+					type: Number,
+					enum: [0, 1, 2],
+				},
 			},
 		],
 	},
@@ -142,9 +146,9 @@ const userSchema = new mongoose.Schema(
 
 // userSchema.pre("save", async function (next) {}),
 //hash password before actually saving to the db
-userSchema.pre("save", async function (next) {
+userSchema.pre('save', async function (next) {
 	//only run this function if password is modified
-	if (!this.isModified("password")) {
+	if (!this.isModified('password')) {
 		return next();
 	}
 
@@ -158,9 +162,9 @@ userSchema.pre("save", async function (next) {
 });
 
 //add value to passwordChangedAt before password (but not rest of other fields) is changed
-userSchema.pre("save", async function (next) {
+userSchema.pre('save', async function (next) {
 	//check if user is new or not recently changed password
-	if (!this.isModified("password") || this.isNew) {
+	if (!this.isModified('password') || this.isNew) {
 		return next();
 	}
 
@@ -199,12 +203,12 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 
 //method to create reset password token
 userSchema.methods.createResetPasswordToken = function () {
-	const resetToken = crypto.randomBytes(32).toString("hex");
+	const resetToken = crypto.randomBytes(32).toString('hex');
 
 	this.passwordResetToken = crypto
-		.createHash("sha256")
+		.createHash('sha256')
 		.update(resetToken)
-		.digest("hex");
+		.digest('hex');
 
 	// console.log({
 	// 	resetToken,
@@ -233,7 +237,8 @@ userSchema.methods.addToCart = async function (productId, qtyy) {
 		//check if passed product has in current cart
 		const isExisting = this.cart.items.findIndex(
 			(item) =>
-				new String(item.productId).trim() === new String(product.id).trim()
+				new String(item.productId).trim() ===
+				new String(product.id).trim()
 		);
 
 		//if so
@@ -274,7 +279,8 @@ userSchema.methods.decreaseFromCart = async function (productId, qtyy) {
 	if (product) {
 		const isExisting = this.cart.items.findIndex(
 			(item) =>
-				new String(item.productId).trim() === new String(product.id).trim()
+				new String(item.productId).trim() ===
+				new String(product.id).trim()
 		);
 
 		//if so
@@ -305,7 +311,8 @@ userSchema.methods.removeFromCart = async function (productId) {
 		this.cart.totalPrice = 0;
 	}
 	const isExisting = this.cart.items.findIndex(
-		(item) => new String(item.productId).trim() === new String(productId).trim()
+		(item) =>
+			new String(item.productId).trim() === new String(productId).trim()
 	);
 	if (isExisting >= 0) {
 		// this.cart.items[isExisting].qty += 1;
@@ -322,6 +329,6 @@ userSchema.methods.removeFromCart = async function (productId) {
 	}
 };
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;
