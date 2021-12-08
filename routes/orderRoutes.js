@@ -1,11 +1,30 @@
 const express = require('express');
 const authController = require('../controllers/authController');
 const orderController = require('../controllers/orderController');
+const userRoutes = require('../routes/userRoutes');
 
 //Create router
 const router = express.Router();
 
-//ROUTES OF ADMIN
+//ROUTES OF CUSTOMERS
+// - get all orders
+router
+	.route('/customer')
+	.get(
+		authController.protect,
+		authController.restrictTo('customer'),
+		orderController.getCustomerOrders
+	);
+// - get one order
+router
+	.route('/customer/:orderId')
+	.get(
+		authController.protect,
+		authController.restrictTo('customer'),
+		orderController.getDetailCustomerOrders
+	);
+
+//ROUTES OF ASSISTANTS
 // - get all orders
 router
 	.route('/')

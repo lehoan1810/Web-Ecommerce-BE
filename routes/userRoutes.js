@@ -1,56 +1,65 @@
-const express = require("express");
-const userController = require("../controllers/userController");
-const authController = require("../controllers/authController");
+const express = require('express');
+const userController = require('../controllers/userController');
+const authController = require('../controllers/authController');
 
 //Create router for user
 const router = express.Router();
 
 //Routes of users as customer
-router.post("/signup", authController.signup);
-router.post("/login", authController.login);
+router.post('/signup', authController.signup);
+router.post('/login', authController.login);
 
-router.post("/forgotPassword", authController.forgotPassword);
-router.patch("/resetPassword/:token", authController.resetPassword);
+router.post('/forgotPassword', authController.forgotPassword);
+router.patch('/resetPassword/:token', authController.resetPassword);
 
 router.patch(
-	"/updateMyPassword",
+	'/updateMyPassword',
 	authController.protect,
 	authController.updatePassword
 );
 
+router.patch('/updateMe', authController.protect, userController.updateMe);
+
+router.delete('/deleteMe', authController.protect, userController.deleteMe);
+
 // test getUser
-router.get("/profile/:id", authController.protect, userController.getOneUser);
-//
+router.get('/profile/:id', authController.protect, userController.getOneUser);
 
-router.patch("/updateMe", authController.protect, userController.updateMe);
-router.delete("/deleteMe", authController.protect, userController.deleteMe);
-
-//Routes of users as assistant/admin (not yet completed)
+//Routes of users as assistant/admin
 // getAllCustomer
 router.get(
-	"/getAllCustomer",
+	'/getAllCustomer',
 	authController.protect,
+	authController.restrictTo('admin', 'assistant'),
 	userController.getAllCustomer
 );
 
-//getAllAssistant
+// getAllAssistant
 router.get(
-	"/getAllAssistant",
+	'/getAllAssistant',
 	authController.protect,
+	authController.restrictTo('admin', 'assistant'),
 	userController.getAllAssistant
 );
 
-//Admin Delete User
+// delete User
 router.delete(
-	"/deleteCustomer/:id",
+	'/deleteCustomer/:id',
 	authController.protect,
+	authController.restrictTo('admin', 'assistant'),
 	userController.deleteCustomer
 );
-//
+
+// getAllUsers
 router
-	.route("/")
-	.get(authController.protect, userController.getAllUsers)
+	.route('/')
+	.get(
+		authController.protect,
+		authController.restrictTo('admin', 'assistant'),
+		userController.getAllUsers
+	)
 	.post(userController.createUser);
+
 // router
 // 	.route("/:id")
 // 	.get(userController.getUser)
