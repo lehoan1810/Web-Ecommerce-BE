@@ -79,7 +79,7 @@ const userSchema = new mongoose.Schema(
 						type: Number,
 						required: true,
 					},
-					nameProduct: {
+					productName: {
 						type: String,
 						required: true,
 					},
@@ -245,7 +245,7 @@ userSchema.methods.addToCart = async function (productId, qtyy) {
 		if (isExisting >= 0) {
 			this.cart.items[isExisting].qty += qtyy;
 			this.cart.items[isExisting].price = product.price;
-			this.cart.items[isExisting].nameProduct = product.name;
+			this.cart.items[isExisting].productName = product.name;
 		}
 		//if not
 		else {
@@ -253,7 +253,7 @@ userSchema.methods.addToCart = async function (productId, qtyy) {
 				productId: product.id,
 				price: product.price,
 				productPicture: product.productPicture,
-				nameProduct: product.name,
+				productName: product.name,
 				qty: qtyy,
 			});
 		}
