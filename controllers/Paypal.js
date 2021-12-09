@@ -1,16 +1,16 @@
-const paypal = require('paypal-rest-sdk');
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
-const validateCart = require('../utils/validateCart');
-const User = require('../models/userModel');
+const paypal = require("paypal-rest-sdk");
+const catchAsync = require("../utils/catchAsync");
+const AppError = require("../utils/appError");
+const validateCart = require("../utils/validateCart");
+const User = require("../models/userModel");
 
-const axios = require('axios');
+const axios = require("axios");
 paypal.configure({
-	mode: 'sandbox',
+	mode: "sandbox",
 	client_id:
-		'AQiKeN030h5sXtw1TDOw0l7u4Bo8KINbSNFZCE-gSX4R0XenEyI6eQAcJcr0Oez_2JM74T5Dc9LvpW7n',
+		"AQiKeN030h5sXtw1TDOw0l7u4Bo8KINbSNFZCE-gSX4R0XenEyI6eQAcJcr0Oez_2JM74T5Dc9LvpW7n",
 	client_secret:
-		'ECBxsoE56ZVQyhBWR15KZ_Z0s18aRHaR9jrCposcw_Aj0GiRRjq1v3SmkfGB1JyGiBkklEfuQlbSoGuV',
+		"ECBxsoE56ZVQyhBWR15KZ_Z0s18aRHaR9jrCposcw_Aj0GiRRjq1v3SmkfGB1JyGiBkklEfuQlbSoGuV",
 });
 
 let convertedTotalPrice = 0;
@@ -23,14 +23,14 @@ exports.testPaypal = catchAsync(async (req, res) => {
 	// const cart = user.cart;
 	// var cartItems = cart.items;
 	var cartItems = user.cart.items;
-	console.log('cart Item: ', cartItems);
+	console.log("cart Item: ", cartItems);
 
 	validateCart(user);
 	await user.save();
 
 	// Chuyển VND sang USD
 	const exchangeUrl =
-		'https://openexchangerates.org/api/latest.json?app_id=964e2023a6b9427dbf728e0bcf1c5a9c';
+		"https://openexchangerates.org/api/latest.json?app_id=964e2023a6b9427dbf728e0bcf1c5a9c";
 	const asyncGetRates = async () => {
 		const data = await axios.get(exchangeUrl);
 		return data.data.rates.VND;
@@ -42,35 +42,30 @@ exports.testPaypal = catchAsync(async (req, res) => {
 			name: item.nameProduct,
 			sku: item.productId,
 			price: Math.round(item.price / exchangeRate),
-			// price: item.price,
-			currency: 'USD',
+			currency: "USD",
 			quantity: item.qty,
 		});
 	});
 
-	console.log('check exchangeRate: ', exchangeRate);
+	console.log("check exchangeRate: ", exchangeRate);
 	convertedTotalPrice = 0;
 	for (i = 0; i < itemss.length; i++) {
 		convertedTotalPrice += parseFloat(itemss[i].price) * itemss[i].quantity;
 	}
 
 	//
-	console.log('lay items: ', itemss);
-	console.log('lay convertedTotalPrice: ', convertedTotalPrice);
+	console.log("lay items: ", itemss);
+	console.log("lay convertedTotalPrice: ", convertedTotalPrice);
 
 	// 4) tạo biến mẫu paypal để giao dịch có items, total là convertedItems, convertedTotalPrice đã tính ở trên
 	var create_payment_json = {
-		intent: 'sale',
+		intent: "sale",
 		payer: {
-			payment_method: 'paypal',
+			payment_method: "paypal",
 		},
 		redirect_urls: {
-			return_url: `${req.protocol}://${req.get(
-				'host'
-			)}/api/v1/pay/success`,
-			cancel_url: `${req.protocol}://${req.get(
-				'host'
-			)}/api/v1/pay/cancel`,
+			return_url: `${req.protocol}://${req.get("host")}/api/v1/pay/success`,
+			cancel_url: `${req.protocol}://${req.get("host")}/api/v1/pay/cancel`,
 			// return_url: "http://localhost:5000/api/v1/pay/success",
 			// cancel_url: "http://localhost:5000/api/v1/pay/cancel",
 		},
@@ -80,40 +75,40 @@ exports.testPaypal = catchAsync(async (req, res) => {
 					items: itemss,
 				},
 				amount: {
-					currency: 'USD',
+					currency: "USD",
 					total: convertedTotalPrice.toString(),
 				},
-				description: 'Hat for the best team ever',
+				description: "Hat for the best team ever",
 			},
 		],
 	};
 
 	// 5) chuyển đến trang giao dịch;
 	paypal.payment.create(create_payment_json, (error, payment) => {
-		console.log('check payment: ', payment);
+		console.log("check payment: ", payment);
 		if (error) {
 			console.log(error.response.details);
-			return next(new AppError('Something went wrong while paying', 400));
+			return next(new AppError("Something went wrong while paying", 400));
 			// res.render('cancel');
 		} else {
 			for (let i = 0; i < payment.links.length; i++) {
-				if (payment.links[i].rel === 'approval_url') {
+				if (payment.links[i].rel === "approval_url") {
 					// res.redirect(payment.links[i].href);
 					res.json({
 						forwardLink: payment.links[i].href,
 					});
 				}
 			}
-			console.log('show payment: ', payment);
+			console.log("show payment: ", payment);
 		}
 	});
 });
 
 // Method khi đã chuyến đến trang giao dịch (sau khi chuyển đến trang giao dịch và bấm thanh toán)
 exports.getSuccess = catchAsync(async (req, res) => {
-	console.log('convertedTotalPrice (success): ', convertedTotalPrice);
+	console.log("convertedTotalPrice (success): ", convertedTotalPrice);
 
-	console.log('user (success): ');
+	console.log("user (success): ");
 	console.log(user);
 
 	// 1) lấy thông tin thanh toán
@@ -125,7 +120,7 @@ exports.getSuccess = catchAsync(async (req, res) => {
 		transactions: [
 			{
 				amount: {
-					currency: 'USD',
+					currency: "USD",
 					total: convertedTotalPrice,
 				},
 			},
@@ -138,9 +133,9 @@ exports.getSuccess = catchAsync(async (req, res) => {
 		execute_payment_json,
 		async function (error, payment) {
 			if (error) {
-				res.render('cancel');
+				res.render("cancel");
 			} else {
-				console.log('Get payment response: ');
+				console.log("Get payment response: ");
 				console.log(JSON.stringify(payment));
 
 				//SUCCESS rồi thì:
@@ -148,14 +143,14 @@ exports.getSuccess = catchAsync(async (req, res) => {
 				let name = [
 					payment.payer.payer_info.first_name,
 					payment.payer.payer_info.last_name,
-				].join(' ');
+				].join(" ");
 				let shippingAddress = [
 					payment.payer.payer_info.shipping_address.line1,
 					payment.payer.payer_info.shipping_address.line2,
 					payment.payer.payer_info.shipping_address.city,
 					payment.payer.payer_info.shipping_address.state,
 					payment.payer.payer_info.shipping_address.country_code,
-				].join(', ');
+				].join(", ");
 
 				user.purchasingHistory.push({
 					items: user.cart.items,
@@ -170,7 +165,7 @@ exports.getSuccess = catchAsync(async (req, res) => {
 				// 3) save lại
 				await user.save();
 
-				res.render('success');
+				res.render("success");
 			}
 		}
 	);
@@ -244,5 +239,5 @@ exports.getSuccess = catchAsync(async (req, res) => {
 
 // Vào đây nếu cancel giao dịch (không muốn thanh toán giữa chừng)
 exports.getCancel = catchAsync(async (req, res, next) => {
-	res.send('Cancelled payment');
+	res.send("Cancelled payment");
 });

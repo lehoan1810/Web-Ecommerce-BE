@@ -1,16 +1,13 @@
-const lodash = require('lodash');
-const User = require('../models/userModel');
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
+const lodash = require("lodash");
+const User = require("../models/userModel");
+const catchAsync = require("../utils/catchAsync");
+const AppError = require("../utils/appError");
 
 const sortByDate = (orders, query, role) => {
 	orders = lodash.orderBy(
 		orders,
-		[
-			(order) =>
-				new Date(role === 'customer' ? order.date : order.order.date),
-		], //
-		query === '-date' ? ['asc'] : ['desc']
+		[(order) => new Date(role === "customer" ? order.date : order.order.date)], //
+		query === "-date" ? ["asc"] : ["desc"]
 	);
 
 	return orders;
@@ -25,7 +22,7 @@ const filterByStatus = (orders, query, role) => {
 	let filteredOrders = [];
 	orders.forEach((order) => {
 		new String(
-			role === 'customer' ? order.status : order.order.status
+			role === "customer" ? order.status : order.order.status
 		).trim() === new String(query).trim() && filteredOrders.push(order);
 	});
 	orders = filteredOrders;
@@ -46,7 +43,7 @@ exports.getCustomerOrders = catchAsync(async (req, res, next) => {
 
 	// 2) send response
 	res.status(200).json({
-		status: 'success',
+		status: "success",
 		length: orders.length,
 		data: {
 			orders,
@@ -63,12 +60,12 @@ exports.getDetailCustomerOrders = catchAsync(async (req, res, next) => {
 		el.id === req.params.orderId && (order = el);
 	});
 	if (order == null) {
-		return next(new AppError('No order found with this id!', 404));
+		return next(new AppError("No order found with this id!", 404));
 	}
 
 	// 2) send response
 	res.status(200).json({
-		status: 'success',
+		status: "success",
 		data: {
 			order,
 		},
@@ -85,6 +82,7 @@ exports.getAllOrders = catchAsync(async (req, res, next) => {
 			user.purchasingHistory.forEach((order) => {
 				orders.push({
 					user: user.id,
+					nameUser: user.name,
 					order,
 				});
 			});
@@ -100,7 +98,7 @@ exports.getAllOrders = catchAsync(async (req, res, next) => {
 
 	// 4) send response
 	res.status(200).json({
-		status: 'success',
+		status: "success",
 		length: orders.length,
 		data: {
 			orders,
@@ -117,11 +115,12 @@ exports.getOrder = catchAsync(async (req, res, next) => {
 		});
 	});
 	if (order == null) {
-		return next(new AppError('No order found with this id!', 404));
+		return next(new AppError("No order found with this id!", 404));
 	}
 
+	console.log("show order: ", order);
 	res.status(200).json({
-		status: 'success',
+		status: "success",
 		data: {
 			order,
 		},
@@ -138,7 +137,7 @@ exports.updateOrder = catchAsync(async (req, res, next) => {
 				if (history.status >= req.body.status) {
 					return next(
 						new AppError(
-							'Trạng thái truyền vào phải lớn hơn trạng thái hiện có',
+							"Trạng thái truyền vào phải lớn hơn trạng thái hiện có",
 							401
 						)
 					);
@@ -165,7 +164,7 @@ exports.updateOrder = catchAsync(async (req, res, next) => {
 				await user.save();
 
 				res.status(200).json({
-					status: 'success',
+					status: "success",
 					data: {
 						order,
 					},
