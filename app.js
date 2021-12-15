@@ -10,6 +10,7 @@ const reviewRouter = require('./routes/reviewRoutes');
 const cartRouter = require('./routes/cartRoutes');
 const purchasingRouter = require('./routes/purchasingRoutes');
 const orderRouter = require('./routes/orderRoutes');
+const statisticsRouter = require('./routes/statisticsRoutes');
 const ejs = require('ejs');
 //create instance for appication of express
 const app = express();
@@ -35,6 +36,7 @@ app.set('view engine', 'ejs');
 app.use('/api/v1/pay', purchasingRouter);
 
 app.use('/api/v1/orders', orderRouter);
+app.use('/api/v1/statistics', statisticsRouter);
 
 //middleware for not found page
 app.all('*', (req, res, next) => {
