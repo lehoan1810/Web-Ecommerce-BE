@@ -22,7 +22,7 @@ const getSoldProducts = async (Model) => {
 						productName: item.productName,
 						qty: item.qty,
 						date: order.date,
-						dateConverted: order.date.toDateString(),
+						dateConverted: order.date.toDateString(), //Thu Sep 12 2021
 					});
 				}
 			});
@@ -61,8 +61,16 @@ const getBy = (getBy, soldProducts, paramsValue) => {
 };
 
 // prettier-ignore
+const monthsInYear = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+// prettier-ignore
 const monthName = (mon) => {
 	return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][mon - 1];
+}
+// prettier-ignore
+const monthExtractedToNumber = (elInfo) => {
+	const monthExtracted = elInfo.dateConverted.slice(4, 7);
+	const result = monthsInYear.indexOf(monthExtracted) + 1;
+	return result;
 }
 
 exports.getTop5BestSellersByMonth = async (req, res, next) => {
@@ -167,6 +175,69 @@ exports.getProductsSoldInYear = async (req, res, next) => {
 		lenght: soldProducts.length,
 		data: {
 			soldProducts,
+		},
+	});
+};
+
+exports.getProductsSoldByEachMonthInYear = async (req, res, next) => {
+	//check if year params is valid
+	if (Number.isNaN(+req.params.year)) {
+		return next(
+			new AppError(`Năm truyền vào không hợp lệ: ${req.params.year}`, 401)
+		);
+	}
+
+	//get all soldProducts of that year(no group)
+	const users = await User.find();
+	let soldProducts = [];
+	users.forEach((el) => {
+		el.purchasingHistory.forEach((order) => {
+			order.items.forEach((item) => {
+				const splitedYear = order.date
+					.toDateString()
+					.split(order.date.toDateString().substring(0, 11));
+				splitedYear[0] = 'somewhat';
+				if (splitedYear[1] * 1 === req.params.year * 1) {
+					soldProducts.push({
+						productId: item.productId,
+						productName: item.productName,
+						qty: item.qty,
+						date: order.date,
+						dateConverted: order.date.toDateString(), //vd: Thu Sep 12 2021
+					});
+				}
+			});
+		});
+	});
+
+	//figure out months in that year
+	let monthsArray = [];
+	soldProducts.forEach((el) => {
+		const monthExtracted = monthExtractedToNumber(el);
+		if (monthsArray.indexOf(monthExtracted) < 0) {
+			monthsArray.push(monthExtracted);
+		}
+	});
+	monthsArray = lodash.orderBy(monthsArray, [(el) => el], ['asc']);
+	console.log('monthsArray: ', monthsArray);
+
+	//fill sold products to each month in that year
+	let result = {};
+	monthsArray.forEach((month) => {
+		result[`${month}`] = [];
+		soldProducts.forEach((el) => {
+			const monthExtracted = monthExtractedToNumber(el);
+			if (monthExtracted === month) {
+				result[`${month}`].push(el);
+			}
+		});
+	});
+	console.log('object result: ', result);
+
+	res.status(200).json({
+		status: 'success',
+		data: {
+			result,
 		},
 	});
 };

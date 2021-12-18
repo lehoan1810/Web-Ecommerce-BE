@@ -26,5 +26,11 @@ router
 	.route('/productssoldin/year/:year')
 	.get(statisticsController.getProductsSoldInYear);
 
+// 3) Thống kê những sản phẩm bán được trong từng tháng của năm nhập vào
+//   3.1) trong năm... (nhập năm bằng số vào params :year)
+router
+	.route('/:year')
+	.get(statisticsController.getProductsSoldByEachMonthInYear);
+
 //export for using in app
 module.exports = router;
