@@ -196,7 +196,6 @@ exports.getProductsSoldByEachMonthInYear = async (req, res, next) => {
 				const splitedYear = order.date
 					.toDateString()
 					.split(order.date.toDateString().substring(0, 11));
-				splitedYear[0] = 'somewhat';
 				if (splitedYear[1] * 1 === req.params.year * 1) {
 					soldProducts.push({
 						productId: item.productId,
@@ -213,26 +212,19 @@ exports.getProductsSoldByEachMonthInYear = async (req, res, next) => {
 	//figure out months in that year
 	let monthsArray = [];
 	soldProducts.forEach((el) => {
-		const monthExtracted = monthExtractedToNumber(el);
-		if (monthsArray.indexOf(monthExtracted) < 0) {
-			monthsArray.push(monthExtracted);
-		}
+		monthsArray.indexOf(monthExtractedToNumber(el)) < 0 &&
+			monthsArray.push(monthExtractedToNumber(el));
 	});
 	monthsArray = lodash.orderBy(monthsArray, [(el) => el], ['asc']);
-	console.log('monthsArray: ', monthsArray);
 
 	//fill sold products to each month in that year
 	let result = {};
 	monthsArray.forEach((month) => {
 		result[`${month}`] = [];
 		soldProducts.forEach((el) => {
-			const monthExtracted = monthExtractedToNumber(el);
-			if (monthExtracted === month) {
-				result[`${month}`].push(el);
-			}
+			monthExtractedToNumber(el) === month && result[`${month}`].push(el);
 		});
 	});
-	console.log('object result: ', result);
 
 	res.status(200).json({
 		status: 'success',
