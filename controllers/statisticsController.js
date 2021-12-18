@@ -209,27 +209,36 @@ exports.getProductsSoldByEachMonthInYear = async (req, res, next) => {
 		});
 	});
 
-	//figure out months in that year
-	let monthsArray = [];
-	soldProducts.forEach((el) => {
-		monthsArray.indexOf(monthExtractedToNumber(el)) < 0 &&
-			monthsArray.push(monthExtractedToNumber(el));
-	});
-	monthsArray = lodash.orderBy(monthsArray, [(el) => el], ['asc']);
+	//assign month values
+	let months = [
+		{ month: 'Tháng 01', value: 0 },
+		{ month: 'Tháng 02', value: 0 },
+		{ month: 'Tháng 03', value: 0 },
+		{ month: 'Tháng 04', value: 0 },
+		{ month: 'Tháng 05', value: 0 },
+		{ month: 'Tháng 06', value: 0 },
+		{ month: 'Tháng 07', value: 0 },
+		{ month: 'Tháng 08', value: 0 },
+		{ month: 'Tháng 09', value: 0 },
+		{ month: 'Tháng 10', value: 0 },
+		{ month: 'Tháng 11', value: 0 },
+		{ month: 'Tháng 12', value: 0 },
+	];
 
-	//fill sold products to each month in that year
-	let result = {};
-	monthsArray.forEach((month) => {
-		result[`${month}`] = [];
+	////fill sold products to each month in that year
+	months.forEach((mo) => {
+		monthInNumber = mo.month.slice(-2) * 1;
 		soldProducts.forEach((el) => {
-			monthExtractedToNumber(el) === month && result[`${month}`].push(el);
+			if (monthExtractedToNumber(el) === monthInNumber)
+				mo.value += el.qty;
 		});
 	});
 
 	res.status(200).json({
 		status: 'success',
 		data: {
-			result,
+			soldProducts,
+			months,
 		},
 	});
 };
