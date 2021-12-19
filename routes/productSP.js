@@ -7,6 +7,8 @@ const {
 	getProductDetail,
 	updateProductById,
 	deleteProductById,
+	getAllProducts,
+	get5ProductsNew,
 } = require("../controllers/product");
 const router = express.Router();
 // const { addCategory, getCategories } = require("../controllers/category");
@@ -24,6 +26,8 @@ router.patch(
 	authController.protect,
 	updateProductById
 );
+router.get("/getAllProduct", getAllProducts);
+router.get("/get5ProductsNew", get5ProductsNew);
 router.delete("/deleteProductById", authController.protect, deleteProductById);
 
 // review product
