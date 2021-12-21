@@ -35,17 +35,11 @@ const productSPShema = new mongoose.Schema(
 			max: [5, "Rating must be below 5"],
 			set: (val) => Math.round(val * 10) / 10,
 		},
-
-		// reviews: [
-		// 	{
-		// 		userId: {
-		// 			type: mongoose.Schema.Types.ObjectId,
-		// 			ref: "User",
-		// 		},
-		// 		type: mongoose.Schema.Types.ObjectId,
-		// 		ref: "Reviews",
-		// 	},
-		// ],
+		specification: {
+			type: String,
+			required: true,
+			trim: true,
+		},
 		category: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "category",

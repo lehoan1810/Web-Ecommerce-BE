@@ -7,8 +7,15 @@ const AppError = require("./../utils/appError");
 const lodash = require("lodash");
 
 exports.createProduct = (req, res) => {
-	const { name, price, description, productPicture, category, createdBy } =
-		req.body;
+	const {
+		name,
+		price,
+		description,
+		productPicture,
+		category,
+		specification,
+		createdBy,
+	} = req.body;
 
 	const product = new Product({
 		name: req.body.name,
@@ -17,6 +24,7 @@ exports.createProduct = (req, res) => {
 		description,
 		productPicture,
 		category,
+		specification,
 		// reviews: req.body.reviews,
 		createdBy: req.user._id,
 	});
@@ -48,18 +56,7 @@ exports.getProductsById = (req, res) => {
 		}
 	});
 };
-// exports.getProductDetail = factory.getOne(Product, { path: "reviews" });
 exports.getProductDetail = catchAsync(async (req, res, next) => {
-	// const { id } = req.params;
-	// let query = Product.findOne({ _id: id });
-	// if ({ path: "reviews" }) query = query.populate({ path: "reviews" });
-	// const doc = await query;
-	// res.status(200).json({
-	// 	status: "success",
-	// 	data: {
-	// 		data: doc,
-	// 	},
-	// });
 	const { id } = req.params;
 	Product.findOne({ _id: id })
 		.populate({ path: "reviews" })
