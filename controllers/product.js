@@ -4,6 +4,7 @@ const category = require("../models/category");
 const catchAsync = require("./../utils/catchAsync");
 const factory = require("./handlerFactory");
 const AppError = require("./../utils/appError");
+const lodash = require("lodash");
 
 exports.createProduct = (req, res) => {
 	const { name, price, description, productPicture, category, createdBy } =
@@ -100,5 +101,58 @@ exports.deleteProductById = catchAsync(async (req, res, next) => {
 	res.status(204).json({
 		status: "success",
 		data: null,
+	});
+});
+
+// get all product
+
+exports.getAllProducts = (req, res, next) => {
+	category.find({}).exec((error, category) => {
+		if (error) {
+			return res.status(400).json({ error });
+		}
+		// return res.status(200).json({ category });
+
+		if (category) {
+			Product.find({}).exec((error, allProducts) => {
+				res.status(200).json({
+					status: "success",
+					lenght: allProducts.length,
+					allProducts,
+				});
+			});
+		}
+	});
+};
+
+// get 5 Products New
+const sortByDate = (orders, query, role) => {
+	orders = lodash.orderBy(
+		orders,
+		[(order) => new Date(role === "customer" ? order.date : order.order.date)], //
+		query === "-date" ? ["asc"] : ["desc"]
+	);
+
+	return orders;
+};
+exports.get5ProductsNew = catchAsync(async (req, res, next) => {
+	category.find({}).exec((error, category) => {
+		if (error) {
+			return res.status(400).json({ error });
+		}
+		// return res.status(200).json({ category });
+
+		if (category) {
+			Product.find({})
+				.sort({ createdAt: -1 })
+				// .sort({ date: -1 })
+				.limit(5)
+				.exec((error, products) => {
+					res.status(200).json({
+						lenght: products.length,
+						products,
+					});
+				});
+		}
 	});
 });

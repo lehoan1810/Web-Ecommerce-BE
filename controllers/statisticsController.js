@@ -1,6 +1,6 @@
-const lodash = require('lodash');
-const User = require('../models/userModel');
-const AppError = require('../utils/appError');
+const lodash = require("lodash");
+const User = require("../models/userModel");
+const AppError = require("../utils/appError");
 
 const getSoldProducts = async (Model) => {
 	const users = await Model.find();
@@ -36,16 +36,14 @@ const getBy = (getBy, soldProducts, paramsValue) => {
 	//get all indices of soldProducts by month params
 	let indices = soldProducts
 		.map((e, i) => {
-			if (getBy === 'month') {
-				return !e.dateConverted.includes(monthName(paramsValue * 1))
-					? i
-					: '';
+			if (getBy === "month") {
+				return !e.dateConverted.includes(monthName(paramsValue * 1)) ? i : "";
 			} else {
 				const splitedDate = e.dateConverted.split(
 					e.dateConverted.substring(0, 11)
 				);
-				splitedDate[0] = 'somewhat';
-				return splitedDate[1] * 1 !== paramsValue * 1 ? i : '';
+				splitedDate[0] = "somewhat";
+				return splitedDate[1] * 1 !== paramsValue * 1 ? i : "";
 			}
 		})
 		.filter(String);
@@ -55,7 +53,7 @@ const getBy = (getBy, soldProducts, paramsValue) => {
 		}
 
 	//sort descly by qty
-	soldProducts = lodash.orderBy(soldProducts, [(el) => el.qty], ['desc']);
+	soldProducts = lodash.orderBy(soldProducts, [(el) => el.qty], ["desc"]);
 
 	return soldProducts;
 };
@@ -77,10 +75,7 @@ exports.getTop5BestSellersByMonth = async (req, res, next) => {
 	//check if month params is valid
 	if (monthName(req.params.month * 1) === undefined) {
 		return next(
-			new AppError(
-				`Tháng truyền vào không hợp lệ: ${req.params.month}`,
-				401
-			)
+			new AppError(`Tháng truyền vào không hợp lệ: ${req.params.month}`, 401)
 		);
 	}
 
@@ -88,14 +83,14 @@ exports.getTop5BestSellersByMonth = async (req, res, next) => {
 	let soldProducts = await getSoldProducts(User);
 
 	//get top 5 by month
-	soldProducts = getBy('month', soldProducts, req.params.month);
+	soldProducts = getBy("month", soldProducts, req.params.month);
 	let top5ByMonth = [];
 	for (let i = 0; i < 5; i++) {
 		top5ByMonth.push(soldProducts[i]);
 	}
 
 	res.status(200).json({
-		status: 'success',
+		status: "success",
 		lenght: top5ByMonth.length,
 		data: {
 			top5ByMonth,
@@ -115,14 +110,14 @@ exports.getTop5BestSellersByYear = async (req, res, next) => {
 	let soldProducts = await getSoldProducts(User);
 
 	//get top 5 by year
-	soldProducts = getBy('year', soldProducts, req.params.year);
+	soldProducts = getBy("year", soldProducts, req.params.year);
 	let top5ByYear = [];
 	for (let i = 0; i < 5; i++) {
 		top5ByYear.push(soldProducts[i]);
 	}
 
 	res.status(200).json({
-		status: 'success',
+		status: "success",
 		lenght: top5ByYear.length,
 		data: {
 			top5ByYear,
@@ -134,10 +129,7 @@ exports.getProductsSoldInMonth = async (req, res, next) => {
 	//check if month params is valid
 	if (monthName(req.params.month * 1) === undefined) {
 		return next(
-			new AppError(
-				`Tháng truyền vào không hợp lệ: ${req.params.month}`,
-				401
-			)
+			new AppError(`Tháng truyền vào không hợp lệ: ${req.params.month}`, 401)
 		);
 	}
 
@@ -145,10 +137,10 @@ exports.getProductsSoldInMonth = async (req, res, next) => {
 	let soldProducts = await getSoldProducts(User);
 
 	//get by month
-	soldProducts = getBy('month', soldProducts, req.params.month);
+	soldProducts = getBy("month", soldProducts, req.params.month);
 
 	res.status(200).json({
-		status: 'success',
+		status: "success",
 		lenght: soldProducts.length,
 		data: {
 			soldProducts,
@@ -168,10 +160,10 @@ exports.getProductsSoldInYear = async (req, res, next) => {
 	let soldProducts = await getSoldProducts(User);
 
 	//get by year
-	soldProducts = getBy('year', soldProducts, req.params.year);
+	soldProducts = getBy("year", soldProducts, req.params.year);
 
 	res.status(200).json({
-		status: 'success',
+		status: "success",
 		lenght: soldProducts.length,
 		data: {
 			soldProducts,
@@ -211,31 +203,30 @@ exports.getProductsSoldByEachMonthInYear = async (req, res, next) => {
 
 	//assign month values
 	let months = [
-		{ month: 'Tháng 01', value: 0 },
-		{ month: 'Tháng 02', value: 0 },
-		{ month: 'Tháng 03', value: 0 },
-		{ month: 'Tháng 04', value: 0 },
-		{ month: 'Tháng 05', value: 0 },
-		{ month: 'Tháng 06', value: 0 },
-		{ month: 'Tháng 07', value: 0 },
-		{ month: 'Tháng 08', value: 0 },
-		{ month: 'Tháng 09', value: 0 },
-		{ month: 'Tháng 10', value: 0 },
-		{ month: 'Tháng 11', value: 0 },
-		{ month: 'Tháng 12', value: 0 },
+		{ month: "Tháng 01", value: 0 },
+		{ month: "Tháng 02", value: 0 },
+		{ month: "Tháng 03", value: 0 },
+		{ month: "Tháng 04", value: 0 },
+		{ month: "Tháng 05", value: 0 },
+		{ month: "Tháng 06", value: 0 },
+		{ month: "Tháng 07", value: 0 },
+		{ month: "Tháng 08", value: 0 },
+		{ month: "Tháng 09", value: 0 },
+		{ month: "Tháng 10", value: 0 },
+		{ month: "Tháng 11", value: 0 },
+		{ month: "Tháng 12", value: 0 },
 	];
 
 	////fill sold products to each month in that year
 	months.forEach((mo) => {
 		monthInNumber = mo.month.slice(-2) * 1;
 		soldProducts.forEach((el) => {
-			if (monthExtractedToNumber(el) === monthInNumber)
-				mo.value += el.qty;
+			if (monthExtractedToNumber(el) === monthInNumber) mo.value += el.qty;
 		});
 	});
 
 	res.status(200).json({
-		status: 'success',
+		status: "success",
 		data: {
 			soldProducts,
 			months,
