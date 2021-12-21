@@ -1,6 +1,6 @@
-const express = require("express");
-const authController = require("../controllers/authController");
-const { testPaypal, getSuccess, getCancel } = require("../controllers/Paypal");
+const express = require('express');
+const authController = require('../controllers/authController');
+const { testPaypal, getSuccess, getCancel } = require('../controllers/Paypal');
 
 const router = express.Router();
 
@@ -13,11 +13,10 @@ router.get(
     }
 );
 
-router.post("/:id", testPaypal);
+router.post('/:id', testPaypal);
 // router.post("", testPaypal);
 
 //chỗ này để thực hiện các bước THANH TOÁN sau khi user bấm nút THANH TOÁN ở trên
-// prettier-ignore
 
 // prettier-ignore
 router.get(
