@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const productSPShema = new mongoose.Schema(
 	{
 		name: {
@@ -20,9 +20,13 @@ const productSPShema = new mongoose.Schema(
 			required: true,
 			trim: true,
 		},
+		specification: {
+			type: String,
+			trim: true,
+		},
 		productPicture: {
 			type: String,
-			default: "",
+			default: '',
 		},
 		ratingsQuantity: {
 			type: Number,
@@ -31,8 +35,8 @@ const productSPShema = new mongoose.Schema(
 		ratingsAverage: {
 			type: Number,
 			default: 4.5,
-			min: [1, "Rating must be above 1"],
-			max: [5, "Rating must be below 5"],
+			min: [1, 'Rating must be above 1'],
+			max: [5, 'Rating must be below 5'],
 			set: (val) => Math.round(val * 10) / 10,
 		},
 		specification: {
@@ -42,12 +46,12 @@ const productSPShema = new mongoose.Schema(
 		},
 		category: {
 			type: mongoose.Schema.Types.ObjectId,
-			ref: "category",
+			ref: 'category',
 			required: true,
 		},
 		createdBy: {
 			type: mongoose.Schema.Types.ObjectId,
-			ref: "User",
+			ref: 'User',
 			required: true,
 		},
 	},
@@ -57,13 +61,13 @@ const productSPShema = new mongoose.Schema(
 // productSPShema.index({ slug: 1 });
 
 //VIRTUAL POPULATE
-productSPShema.virtual("reviews", {
-	ref: "Review",
-	foreignField: "product",
-	localField: "_id",
+productSPShema.virtual('reviews', {
+	ref: 'Review',
+	foreignField: 'product',
+	localField: '_id',
 });
-productSPShema.set("toObject", { virtuals: true });
-productSPShema.set("toJSON", { virtuals: true });
+productSPShema.set('toObject', { virtuals: true });
+productSPShema.set('toJSON', { virtuals: true });
 
 //DOCUMENT MIDDLEWARE: slug
 // productSPShema.pre("save", function (next) {
@@ -71,4 +75,4 @@ productSPShema.set("toJSON", { virtuals: true });
 // 	next();
 // });
 
-module.exports = mongoose.model("productSP", productSPShema);
+module.exports = mongoose.model('productSP', productSPShema);
