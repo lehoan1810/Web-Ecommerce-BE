@@ -255,3 +255,36 @@ exports.paginationProducts = (req, res, next) => {
 		}
 	});
 };
+
+// sort product + pagination
+exports.paginationSort = (req, res, next) => {
+	let perPage = parseInt(req.query.size);
+	let sort = parseInt(req.query.sort);
+	let page = parseInt(req.query.page) || 1;
+	const { id } = req.params;
+	console.log(perPage);
+	category.findOne({ _id: id }).exec((error, category) => {
+		if (error) {
+			return res.status(400).json({ error });
+		}
+		if (category) {
+			Product.find({ category: category._id })
+				.sort({ price: sort })
+				.skip(perPage * page - perPage) // Trong page đầu tiên sẽ bỏ qua giá trị là 0
+				.limit(perPage)
+				.exec((err, sortProduct) => {
+					Product.find({ category: category._id }).countDocuments(
+						(err, count) => {
+							// đếm để tính có bao nhiêu trang
+							if (err) return next(err);
+							res.status(200).json({
+								sortProduct, // product one page
+								current: page,
+								pages: Math.ceil(count / perPage), // total page
+							});
+						}
+					);
+				});
+		}
+	});
+};

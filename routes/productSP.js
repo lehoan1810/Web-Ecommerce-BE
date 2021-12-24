@@ -13,6 +13,7 @@ const {
 	sortProductMaxMin,
 	sortTwoPrice,
 	paginationProducts,
+	paginationSort,
 } = require("../controllers/product");
 const router = express.Router();
 // const { addCategory, getCategories } = require("../controllers/category");
@@ -37,6 +38,7 @@ router.get("/sortMinMax/:id", sortProductMinMax);
 router.get("/sortMaxMin/:id", sortProductMaxMin);
 router.get("/sortTwoPrice/:id", sortTwoPrice);
 router.get("/pagination/:id", paginationProducts);
+router.get("/paginationSort/:id", paginationSort);
 
 // review product
 router.use("/:productId/reviews", reviewRoutes);
