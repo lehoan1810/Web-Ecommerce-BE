@@ -153,3 +153,105 @@ exports.get5ProductsNew = catchAsync(async (req, res, next) => {
 		}
 	});
 });
+
+// sort product
+exports.sortProductMinMax = async (req, res) => {
+	const { id } = req.params;
+	let sortProduct = [];
+	// let test = [];
+	category.findOne({ _id: id }).exec((error, category) => {
+		if (error) {
+			return res.status(400).json({ error });
+		}
+		// return res.status(200).json({ category });
+
+		if (category) {
+			Product.find({ category: category._id })
+				.sort({ price: 1 })
+				.limit(8)
+				.exec((error, products) => {
+					sortProduct = products.sort((a, b) => a.price - b.price);
+
+					res.status(200).json({
+						sortProduct,
+					});
+				});
+		}
+	});
+};
+
+exports.sortProductMaxMin = (req, res) => {
+	const { id } = req.params;
+	// let sortProduct = [];
+	// let test = [];
+	category.findOne({ _id: id }).exec((error, category) => {
+		if (error) {
+			return res.status(400).json({ error });
+		}
+		// return res.status(200).json({ category });
+
+		if (category) {
+			Product.find({ category: category._id })
+				.sort({ price: -1 })
+				.limit(8)
+				.exec((error, sortProduct) => {
+					// sortProduct = products.sort((a, b) => b.price - a.price);
+
+					res.status(200).json({
+						sortProduct,
+					});
+				});
+		}
+	});
+};
+// sort between two price
+exports.sortTwoPrice = (req, res) => {
+	const { id } = req.params;
+	const { min, max } = req.query.price;
+	console.log(req.query.price);
+	category.findOne({ _id: id }).exec((error, category) => {
+		if (error) {
+			return res.status(400).json({ error });
+		}
+		if (category) {
+			Product.find({ category: category._id }).exec((error, products) => {
+				let sortProduct = products.filter(
+					(item) => item.price >= parseInt(min) && item.price <= parseInt(max)
+				);
+				res.status(200).json({
+					sortProduct,
+				});
+			});
+		}
+	});
+};
+// Pagination
+exports.paginationProducts = (req, res, next) => {
+	let perPage = parseInt(req.query.size);
+	let page = parseInt(req.query.page) || 1;
+	const { id } = req.params;
+	console.log(perPage);
+	category.findOne({ _id: id }).exec((error, category) => {
+		if (error) {
+			return res.status(400).json({ error });
+		}
+		if (category) {
+			Product.find({ category: category._id })
+				.skip(perPage * page - perPage) // Trong page đầu tiên sẽ bỏ qua giá trị là 0
+				.limit(perPage)
+				.exec((err, products) => {
+					Product.find({ category: category._id }).countDocuments(
+						(err, count) => {
+							// đếm để tính có bao nhiêu trang
+							if (err) return next(err);
+							res.status(200).json({
+								products, // product one page
+								current: page,
+								pages: Math.ceil(count / perPage), // total page
+							});
+						}
+					);
+				});
+		}
+	});
+};

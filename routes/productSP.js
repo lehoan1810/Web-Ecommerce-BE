@@ -9,6 +9,10 @@ const {
 	deleteProductById,
 	getAllProducts,
 	get5ProductsNew,
+	sortProductMinMax,
+	sortProductMaxMin,
+	sortTwoPrice,
+	paginationProducts,
 } = require("../controllers/product");
 const router = express.Router();
 // const { addCategory, getCategories } = require("../controllers/category");
@@ -29,6 +33,10 @@ router.patch(
 router.get("/getAllProduct", getAllProducts);
 router.get("/get5ProductsNew", get5ProductsNew);
 router.delete("/deleteProductById", authController.protect, deleteProductById);
+router.get("/sortMinMax/:id", sortProductMinMax);
+router.get("/sortMaxMin/:id", sortProductMaxMin);
+router.get("/sortTwoPrice/:id", sortTwoPrice);
+router.get("/pagination/:id", paginationProducts);
 
 // review product
 router.use("/:productId/reviews", reviewRoutes);
