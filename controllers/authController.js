@@ -5,6 +5,8 @@ const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const Email = require('./../utils/email');
+const tokenS = require('../utils/token');
+const Token = require('../models/tokenModel');
 
 //create token for user signed up or logged in
 const signToken = (id, name, email, role) => {
@@ -43,11 +45,16 @@ const createSendToken = (user, statusCode, res) => {
 exports.signup = catchAsync(async (req, res, next) => {
 	//const newUser = await User.create(req.body);
 	//Use this to prevent users try to register as a admin in role
-	const newUser = await User.create(req.body);
-	const url = `${req.protocol}://${req.get('host')}/login`;
-	await new Email(newUser, url).sendWelcome();
-
-	createSendToken(newUser, 201, res);
+	try {
+		const newUser = await User.create(req.body);
+		const verifyEmailToken = await tokenS.generateVerifyEmailToken(newUser);
+		const url = `${req.protocol}://${req.get('host')}/api/v1/users/verify-email?token=${verifyEmailToken}`;
+		await new Email(newUser, url).sendVerifyEmail();
+	
+		createSendToken(newUser, 201, res);
+	} catch(e) {
+		console.log(e)
+	}
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -216,4 +223,23 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
 	// 4) logging user in again, send back jwt
 	createSendToken(user, 200, res);
+});
+
+
+exports.verifyEmail = catchAsync(async (req, res, next) => {
+	try {
+		console.log(req.query.token);
+		const result = await tokenS.verifyToken(req.query.token);
+		const user = await User.findById(result.user);
+		if (!user) {
+		  throw new AppError('Email verification failed', 403);
+		}
+		await Token.deleteMany({ user: user.id });
+		Object.assign(user, {verified: true});
+		await user.save();
+		res.render('verify');
+	  } catch (error) {
+		console.log(error);
+		throw new AppError('Email verification failed', 403);
+	  }
 });
