@@ -70,4 +70,27 @@ module.exports = class Email {
 			"Your password reset token (valid for only 10 minutes)"
 		);
 	}
+
+	async sendVerifyEmail() {
+
+		const html = pug.renderFile(`${__dirname}/../views/email/verify.pug`, {
+			name: this.name,
+			url: this.url,
+			subject: "Welcome to our shop",
+		});
+
+		const mailOptions = {
+			from: this.from,
+			to: this.to,
+			subject: "Welcome to our shop",
+			text: htmlToText.fromString(html),
+			html,
+			//html
+		};
+		try {
+			await this.newTransport().sendMail(mailOptions);
+		} catch(error) {
+			console.log(error);
+		}
+	}
 };
