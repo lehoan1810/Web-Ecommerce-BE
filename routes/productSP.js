@@ -1,6 +1,6 @@
-const express = require("express");
-const reviewRoutes = require("./../routes/reviewRoutes");
-const authController = require("../controllers/authController");
+const express = require('express');
+const reviewRoutes = require('./../routes/reviewRoutes');
+const authController = require('../controllers/authController');
 const {
 	createProduct,
 	getProductsById,
@@ -14,33 +14,39 @@ const {
 	sortTwoPrice,
 	paginationProducts,
 	paginationSort,
-} = require("../controllers/product");
+
+	getAllFiltered,
+} = require('../controllers/product');
 const router = express.Router();
 // const { addCategory, getCategories } = require("../controllers/category");
 
 router.post(
-	"/addproduct",
+	'/addproduct',
 	authController.protect,
-	authController.restrictTo("assistant"),
+	authController.restrictTo('assistant'),
 	createProduct
 );
-router.get("/getProductsId/:id", getProductsById);
-router.get("/getProductDetail/:id", getProductDetail);
+router.get('/getProductsId/:id', getProductsById);
+router.get('/getProductDetail/:id', getProductDetail);
 router.patch(
-	"/updateProductById/:id",
+	'/updateProductById/:id',
 	authController.protect,
 	updateProductById
 );
-router.get("/getAllProduct", getAllProducts);
-router.get("/get5ProductsNew", get5ProductsNew);
-router.delete("/deleteProductById", authController.protect, deleteProductById);
-router.get("/sortMinMax/:id", sortProductMinMax);
-router.get("/sortMaxMin/:id", sortProductMaxMin);
-router.get("/sortTwoPrice/:id", sortTwoPrice);
-router.get("/pagination/:id", paginationProducts);
-router.get("/paginationSort/:id", paginationSort);
+router.get('/getAllProduct', getAllProducts);
+router.get('/get5ProductsNew', get5ProductsNew);
+router.delete('/deleteProductById', authController.protect, deleteProductById);
+router.get('/sortMinMax/:id', sortProductMinMax);
+router.get('/sortMaxMin/:id', sortProductMaxMin);
+router.get('/sortTwoPrice/:id', sortTwoPrice);
+router.get('/pagination/:id', paginationProducts);
+router.get('/paginationSort/:id', paginationSort);
+
+//hung
+router.get('/:brandId/products', getAllFiltered);
+//
 
 // review product
-router.use("/:productId/reviews", reviewRoutes);
+router.use('/:productId/reviews', reviewRoutes);
 
 module.exports = router;

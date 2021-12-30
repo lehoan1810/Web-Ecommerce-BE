@@ -1,10 +1,12 @@
-const Product = require("../models/productSP");
-const slugif = require("slugify");
-const category = require("../models/category");
-const catchAsync = require("./../utils/catchAsync");
-const factory = require("./handlerFactory");
-const AppError = require("./../utils/appError");
-const lodash = require("lodash");
+const Product = require('../models/productSP');
+const slugif = require('slugify');
+const category = require('../models/category');
+const catchAsync = require('./../utils/catchAsync');
+const factory = require('./handlerFactory');
+const AppError = require('./../utils/appError');
+const lodash = require('lodash');
+
+const APIFeatures = require('./../utils/apiFeatures');
 
 exports.createProduct = (req, res) => {
 	const {
@@ -59,7 +61,7 @@ exports.getProductsById = (req, res) => {
 exports.getProductDetail = catchAsync(async (req, res, next) => {
 	const { id } = req.params;
 	Product.findOne({ _id: id })
-		.populate({ path: "reviews" })
+		.populate({ path: 'reviews' })
 		.exec((error, product) => {
 			if (error) {
 				return res.status(400).json({ error });
@@ -70,17 +72,21 @@ exports.getProductDetail = catchAsync(async (req, res, next) => {
 
 // update product
 exports.updateProductById = catchAsync(async (req, res, next) => {
-	const newProduct = await Product.findByIdAndUpdate(req.params.id, req.body, {
-		new: true,
-		runValidators: true,
-	});
+	const newProduct = await Product.findByIdAndUpdate(
+		req.params.id,
+		req.body,
+		{
+			new: true,
+			runValidators: true,
+		}
+	);
 
 	if (!newProduct) {
 		return next(new AppError(`No product found with this ID`, 404));
 	}
 
 	res.status(200).json({
-		status: "success",
+		status: 'success',
 		data: {
 			product: newProduct,
 		},
@@ -96,7 +102,7 @@ exports.deleteProductById = catchAsync(async (req, res, next) => {
 	}
 
 	res.status(204).json({
-		status: "success",
+		status: 'success',
 		data: null,
 	});
 });
@@ -113,7 +119,7 @@ exports.getAllProducts = (req, res, next) => {
 		if (category) {
 			Product.find({}).exec((error, allProducts) => {
 				res.status(200).json({
-					status: "success",
+					status: 'success',
 					lenght: allProducts.length,
 					allProducts,
 				});
@@ -126,8 +132,11 @@ exports.getAllProducts = (req, res, next) => {
 const sortByDate = (orders, query, role) => {
 	orders = lodash.orderBy(
 		orders,
-		[(order) => new Date(role === "customer" ? order.date : order.order.date)], //
-		query === "-date" ? ["asc"] : ["desc"]
+		[
+			(order) =>
+				new Date(role === 'customer' ? order.date : order.order.date),
+		], //
+		query === '-date' ? ['asc'] : ['desc']
 	);
 
 	return orders;
@@ -216,7 +225,9 @@ exports.sortTwoPrice = (req, res) => {
 		if (category) {
 			Product.find({ category: category._id }).exec((error, products) => {
 				let sortProduct = products.filter(
-					(item) => item.price >= parseInt(min) && item.price <= parseInt(max)
+					(item) =>
+						item.price >= parseInt(min) &&
+						item.price <= parseInt(max)
 				);
 				res.status(200).json({
 					sortProduct,
@@ -288,3 +299,7 @@ exports.paginationSort = (req, res, next) => {
 		}
 	});
 };
+
+//hung
+exports.getAllFiltered = factory.getAll(Product);
+//

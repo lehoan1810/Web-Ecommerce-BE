@@ -1,6 +1,6 @@
-const catchAsync = require("./../utils/catchAsync");
-const AppError = require("./../utils/appError");
-const APIFeatures = require("./../utils/apiFeatures");
+const catchAsync = require('./../utils/catchAsync');
+const AppError = require('./../utils/appError');
+const APIFeatures = require('./../utils/apiFeatures');
 
 exports.getAll = (Model) =>
 	catchAsync(async (req, res, next) => {
@@ -11,9 +11,7 @@ exports.getAll = (Model) =>
 		let filter = {};
 		if (req.params.tourId) filter = { tour: req.params.tourId };
 
-		console.log("//get all products req.query:");
-		console.log(req.query);
-		console.log("////");
+		console.log('req.query: ', req.query);
 
 		//executing query
 		const features = new APIFeatures(
@@ -30,7 +28,7 @@ exports.getAll = (Model) =>
 
 		//Send response
 		res.status(200).json({
-			status: "success",
+			status: 'success',
 			results: docs.length,
 			requestAt: req.requestTime,
 			data: {
@@ -52,7 +50,7 @@ exports.getOne = (Model, popOptions) =>
 		}
 
 		res.status(200).json({
-			status: "success",
+			status: 'success',
 			data: {
 				data: doc,
 			},
@@ -67,7 +65,7 @@ exports.createOne = (Model) =>
 		const doc = await Model.create(req.body);
 
 		res.status(201).json({
-			status: "success",
+			status: 'success',
 			data: {
 				doc: doc,
 			},
@@ -86,7 +84,7 @@ exports.updateOne = (Model) =>
 		}
 
 		res.status(200).json({
-			status: "success",
+			status: 'success',
 			data: {
 				data: doc,
 			},
@@ -102,7 +100,7 @@ exports.deleteOne = (Model) =>
 		}
 
 		res.status(204).json({
-			status: "success",
+			status: 'success',
 			data: null,
 		});
 	});
