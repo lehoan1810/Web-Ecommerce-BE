@@ -17,7 +17,6 @@ router.post('/:id', testPaypal);
 // router.post("", testPaypal);
 
 //chỗ này để thực hiện các bước THANH TOÁN sau khi user bấm nút THANH TOÁN ở trên
-
 // prettier-ignore
 router.get(
     '/success',
