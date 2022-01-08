@@ -1,4 +1,4 @@
-const Product = require("./../models/productSP");
+const Product = require('./../models/productSP');
 
 //function validate cart
 module.exports = async (Model) => {
@@ -17,8 +17,6 @@ module.exports = async (Model) => {
 			item.nameProduct = uptodateProduct.name;
 			item.price = uptodateProduct.price;
 			Model.cart.totalPrice += differencePrice * item.qty;
-			console.log("item.productName: ", item.nameProduct);
-			console.log("differencePrice (exists):", differencePrice);
 		}
 
 		//if product in cart not exists in shop anymore
@@ -26,7 +24,8 @@ module.exports = async (Model) => {
 			//get current index of item in cart
 			const isExisting = Model.cart.items.findIndex(
 				(i) =>
-					new String(i.productId).trim() === new String(item.productId).trim()
+					new String(i.productId).trim() ===
+					new String(item.productId).trim()
 			);
 			Model.cart.totalPrice -= item.price * item.qty;
 			Model.cart.items.splice(isExisting, 1);

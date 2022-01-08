@@ -39,7 +39,11 @@ exports.getAll = (Model) =>
 
 exports.getOne = (Model, popOptions) =>
 	catchAsync(async (req, res, next) => {
-		let query = Model.findById(req.params.id);
+		let query = Model.findById(
+			req.params.id
+				? req.params.id
+				: Object.values(req.params)[Object.keys(req.params).length - 1]
+		);
 		if (popOptions) query = query.populate(popOptions);
 
 		const doc = await query;
@@ -74,10 +78,16 @@ exports.createOne = (Model) =>
 
 exports.updateOne = (Model) =>
 	catchAsync(async (req, res, next) => {
-		const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
-			new: true,
-			runValidators: true,
-		});
+		const doc = await Model.findByIdAndUpdate(
+			req.params.id
+				? req.params.id
+				: Object.values(req.params)[Object.keys(req.params).length - 1],
+			req.body,
+			{
+				new: true,
+				runValidators: true,
+			}
+		);
 
 		if (!doc) {
 			return next(new AppError(`No document found with this ID`, 404));
@@ -93,7 +103,11 @@ exports.updateOne = (Model) =>
 
 exports.deleteOne = (Model) =>
 	catchAsync(async (req, res, next) => {
-		const doc = await Model.findByIdAndDelete(req.params.id);
+		const doc = await Model.findByIdAndDelete(
+			req.params.id
+				? req.params.id
+				: Object.values(req.params)[Object.keys(req.params).length - 1]
+		);
 
 		if (!doc) {
 			return next(new AppError(`No document found with this ID`, 404));

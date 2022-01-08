@@ -18,7 +18,6 @@ const {
 	getAllFiltered,
 } = require('../controllers/product');
 const router = express.Router();
-// const { addCategory, getCategories } = require("../controllers/category");
 
 router.post(
 	'/addproduct',

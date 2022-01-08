@@ -3,6 +3,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const validateCart = require('../utils/validateCart');
 const User = require('../models/userModel');
+const Voucher = require('../models/voucherModel');
 
 const axios = require('axios');
 paypal.configure({
@@ -13,44 +14,16 @@ paypal.configure({
 		'ECBxsoE56ZVQyhBWR15KZ_Z0s18aRHaR9jrCposcw_Aj0GiRRjq1v3SmkfGB1JyGiBkklEfuQlbSoGuV',
 });
 
-const discountHandler = (convertedTotalPrice) => {
-	if (convertedTotalPrice >= 878) {
-		return {
-			discountPercent: 0.2,
-			message: 'Giam 20% cho don hang tren 20 trieu dong',
-			sku: 'HQHDISFR20MIVN',
-		};
-	} else if (convertedTotalPrice >= 350) {
-		return {
-			discountPercent: 0.13,
-			message: 'Giam 13% cho don hang tren 8 trieu dong',
-			sku: 'HQHDISFR08MIVN',
-		};
-	} else if (convertedTotalPrice >= 220) {
-		return {
-			discountPercent: 0.1,
-			message: 'Giam 10% cho don hang tren 5 trieu dong',
-			sku: 'HQHDISFR05MIVN',
-		};
-	} else {
-		return {
-			message: 'Giam gia: 0vnd',
-			sku: 'null',
-			discountPercent: 0,
-		};
-	}
-};
-
-let convertedTotalPrice, exchangeRate;
+let convertedTotalPrice, totalPrice;
 let user = {};
 
 exports.testPaypal = catchAsync(async (req, res, next) => {
 	//reset
 	convertedTotalPrice = 0;
-	exchangeRate = 0;
+	totalPrice = 0;
 
 	// 1) Lấy thông tin user và thông tin giỏ hàng
-	user = await User.findById(req.params.id);
+	user = await User.findById(req.params.userId);
 
 	validateCart(user);
 	await user.save();
@@ -66,7 +39,7 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 		const data = await axios.get(exchangeUrl);
 		return data.data.rates.VND;
 	};
-	exchangeRate = await asyncGetRates();
+	const exchangeRate = await asyncGetRates();
 	console.log('exchangeRate: ', exchangeRate);
 
 	// 3) tạo itemss để cho vào items của transaction
@@ -74,31 +47,41 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 	cartItems.forEach((item) => {
 		itemss.push({
 			name: item.productName,
-			sku: item.productId,
-			price: Math.round(item.price / exchangeRate),
+			sku: item.productId + '',
+			price: Math.ceil(item.price / exchangeRate),
 			currency: 'USD',
 			quantity: item.qty,
 		});
+		totalPrice += item.price * item.qty;
 	});
-
-	for (i = 0; i < itemss.length; i++) {
-		convertedTotalPrice += parseFloat(itemss[i].price) * itemss[i].quantity;
-	}
+	convertedTotalPrice = Math.ceil(totalPrice / exchangeRate);
 
 	// 4) quy định giảm giá (testing)
-	const discountObj = discountHandler(convertedTotalPrice);
+	const discountObj = await Voucher.findOne({ code: req.body.code });
 
-	let discount = -Math.floor(
-		convertedTotalPrice * discountObj.discountPercent
-	);
-	itemss.push({
-		name: discountObj.message,
-		sku: discountObj.sku,
-		price: discount,
-		currency: 'USD',
-		quantity: 1,
-	});
-	convertedTotalPrice += discount;
+	if (req.body.code) {
+		if (!discountObj)
+			return next(
+				new AppError(
+					'This voucher is not exists, please check and try again',
+					400
+				)
+			);
+		let discount = -Math.ceil(
+			convertedTotalPrice * (discountObj.discountPercent / 100)
+		);
+		console.log('discount: ', discount);
+		itemss.push({
+			name: discountObj.describe,
+			sku: discountObj.id,
+			price: discount,
+			currency: 'USD',
+			quantity: 1,
+		});
+		totalPrice -= totalPrice * (discountObj.discountPercent / 100);
+		convertedTotalPrice += discount;
+		console.log('itemss: ', itemss);
+	}
 
 	// 5) tạo biến mẫu paypal để giao dịch có items, total là convertedItems, convertedTotalPrice đã tính ở trên
 	var create_payment_json = {
@@ -190,7 +173,7 @@ exports.getSuccess = catchAsync(async (req, res) => {
 
 				user.purchasingHistory.push({
 					items: user.cart.items,
-					totalPrice: convertedTotalPrice * exchangeRate,
+					totalPrice: totalPrice,
 					name: name,
 					shippingAddress: shippingAddress,
 					status: 0,

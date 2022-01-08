@@ -11,7 +11,9 @@ const cartRouter = require('./routes/cartRoutes');
 const purchasingRouter = require('./routes/purchasingRoutes');
 const orderRouter = require('./routes/orderRoutes');
 const statisticsRouter = require('./routes/statisticsRoutes');
+const voucherRouters = require('./routes/voucherRoutes');
 const ejs = require('ejs');
+
 //create instance for appication of express
 const app = express();
 
@@ -31,6 +33,7 @@ app.use('/api/v1/category', categoryRouters);
 app.use('/api/v1/category', productRouters);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/api/v1/cart', cartRouter);
+app.use('/api/v1/vouchers', voucherRouters);
 
 app.set('view engine', 'ejs');
 app.use('/api/v1/pay', purchasingRouter);
