@@ -1,17 +1,17 @@
-const paypal = require('paypal-rest-sdk');
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
-const validateCart = require('../utils/validateCart');
-const User = require('../models/userModel');
-const Voucher = require('../models/voucherModel');
+const paypal = require("paypal-rest-sdk");
+const catchAsync = require("../utils/catchAsync");
+const AppError = require("../utils/appError");
+const validateCart = require("../utils/validateCart");
+const User = require("../models/userModel");
+const Voucher = require("../models/voucherModel");
 
-const axios = require('axios');
+const axios = require("axios");
 paypal.configure({
-	mode: 'sandbox',
+	mode: "sandbox",
 	client_id:
-		'AQiKeN030h5sXtw1TDOw0l7u4Bo8KINbSNFZCE-gSX4R0XenEyI6eQAcJcr0Oez_2JM74T5Dc9LvpW7n',
+		"AQiKeN030h5sXtw1TDOw0l7u4Bo8KINbSNFZCE-gSX4R0XenEyI6eQAcJcr0Oez_2JM74T5Dc9LvpW7n",
 	client_secret:
-		'ECBxsoE56ZVQyhBWR15KZ_Z0s18aRHaR9jrCposcw_Aj0GiRRjq1v3SmkfGB1JyGiBkklEfuQlbSoGuV',
+		"ECBxsoE56ZVQyhBWR15KZ_Z0s18aRHaR9jrCposcw_Aj0GiRRjq1v3SmkfGB1JyGiBkklEfuQlbSoGuV",
 });
 
 let convertedTotalPrice, totalPrice;
@@ -30,31 +30,31 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 
 	var cartItems = user.cart.items;
 
-	if (cartItems.length <= 0) return next(new AppError('Cart is empty!', 400));
+	if (cartItems.length <= 0) return next(new AppError("Cart is empty!", 400));
 
 	// 2) Chuyển VND sang USD
 	const exchangeUrl =
-		'https://openexchangerates.org/api/latest.json?app_id=964e2023a6b9427dbf728e0bcf1c5a9c';
+		"https://openexchangerates.org/api/latest.json?app_id=964e2023a6b9427dbf728e0bcf1c5a9c";
 	const asyncGetRates = async () => {
 		const data = await axios.get(exchangeUrl);
 		return data.data.rates.VND;
 	};
 	const exchangeRate = await asyncGetRates();
-	console.log('exchangeRate: ', exchangeRate);
+	console.log("exchangeRate: ", exchangeRate);
 
 	// 3) tạo itemss để cho vào items của transaction
 	let itemss = [];
 	cartItems.forEach((item) => {
 		itemss.push({
 			name: item.productName,
-			sku: item.productId + '',
-			price: Math.ceil(item.price / exchangeRate),
-			currency: 'USD',
+			sku: item.productId + "",
+			price: Math.round(item.price / exchangeRate),
+			currency: "USD",
 			quantity: item.qty,
 		});
 		totalPrice += item.price * item.qty;
 	});
-	convertedTotalPrice = Math.ceil(totalPrice / exchangeRate);
+	convertedTotalPrice = Math.round(totalPrice / exchangeRate);
 
 	// 4) quy định giảm giá (testing)
 	const discountObj = await Voucher.findOne({ code: req.body.code });
@@ -63,39 +63,35 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 		if (!discountObj)
 			return next(
 				new AppError(
-					'This voucher is not exists, please check and try again',
+					"This voucher is not exists, please check and try again",
 					400
 				)
 			);
-		let discount = -Math.ceil(
+		let discount = -Math.round(
 			convertedTotalPrice * (discountObj.discountPercent / 100)
 		);
-		console.log('discount: ', discount);
+		console.log("discount: ", discount);
 		itemss.push({
 			name: discountObj.describe,
 			sku: discountObj.id,
 			price: discount,
-			currency: 'USD',
+			currency: "USD",
 			quantity: 1,
 		});
 		totalPrice -= totalPrice * (discountObj.discountPercent / 100);
 		convertedTotalPrice += discount;
-		console.log('itemss: ', itemss);
+		console.log("itemss: ", itemss);
 	}
 
 	// 5) tạo biến mẫu paypal để giao dịch có items, total là convertedItems, convertedTotalPrice đã tính ở trên
 	var create_payment_json = {
-		intent: 'sale',
+		intent: "sale",
 		payer: {
-			payment_method: 'paypal',
+			payment_method: "paypal",
 		},
 		redirect_urls: {
-			return_url: `${req.protocol}://${req.get(
-				'host'
-			)}/api/v1/pay/success`,
-			cancel_url: `${req.protocol}://${req.get(
-				'host'
-			)}/api/v1/pay/cancel`,
+			return_url: `${req.protocol}://${req.get("host")}/api/v1/pay/success`,
+			cancel_url: `${req.protocol}://${req.get("host")}/api/v1/pay/cancel`,
 			// return_url: "http://localhost:5000/api/v1/pay/success",
 			// cancel_url: "http://localhost:5000/api/v1/pay/cancel",
 		},
@@ -105,10 +101,10 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 					items: itemss,
 				},
 				amount: {
-					currency: 'USD',
+					currency: "USD",
 					total: convertedTotalPrice,
 				},
-				description: 'Hat for the best team ever',
+				description: "Hat for the best team ever",
 			},
 		],
 	};
@@ -116,11 +112,11 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 	// 6) chuyển đến trang giao dịch;
 	paypal.payment.create(create_payment_json, (error, payment) => {
 		if (error) {
-			return next(new AppError('Something went wrong while paying', 400));
+			return next(new AppError("Something went wrong while paying", 400));
 			// res.render('cancel');
 		} else {
 			for (let i = 0; i < payment.links.length; i++) {
-				if (payment.links[i].rel === 'approval_url') {
+				if (payment.links[i].rel === "approval_url") {
 					//res.redirect(payment.links[i].href);
 					res.json({
 						forwardLink: payment.links[i].href,
@@ -142,7 +138,7 @@ exports.getSuccess = catchAsync(async (req, res) => {
 		transactions: [
 			{
 				amount: {
-					currency: 'USD',
+					currency: "USD",
 					total: convertedTotalPrice,
 				},
 			},
@@ -155,21 +151,21 @@ exports.getSuccess = catchAsync(async (req, res) => {
 		execute_payment_json,
 		async function (error, payment) {
 			if (error) {
-				res.render('cancel');
+				res.render("cancel");
 			} else {
 				//SUCCESS rồi thì:
 				// 1) thêm vào lịch sử mua hàng
 				let name = [
 					payment.payer.payer_info.first_name,
 					payment.payer.payer_info.last_name,
-				].join(' ');
+				].join(" ");
 				let shippingAddress = [
 					payment.payer.payer_info.shipping_address.line1,
 					payment.payer.payer_info.shipping_address.line2,
 					payment.payer.payer_info.shipping_address.city,
 					payment.payer.payer_info.shipping_address.state,
 					payment.payer.payer_info.shipping_address.country_code,
-				].join(', ');
+				].join(", ");
 
 				user.purchasingHistory.push({
 					items: user.cart.items,
@@ -184,7 +180,7 @@ exports.getSuccess = catchAsync(async (req, res) => {
 				// 3) save lại
 				await user.save();
 
-				res.render('success');
+				res.render("success");
 			}
 		}
 	);
@@ -192,5 +188,5 @@ exports.getSuccess = catchAsync(async (req, res) => {
 
 // Vào đây nếu cancel giao dịch (không muốn thanh toán giữa chừng)
 exports.getCancel = catchAsync(async (req, res, next) => {
-	res.send('Cancelled payment');
+	res.send("Cancelled payment");
 });
