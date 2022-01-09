@@ -22,8 +22,6 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 	convertedTotalPrice = 0;
 	totalPrice = 0;
 
-	req.body.code = "HQHNEWYEAR10";
-
 	// 1) Lấy thông tin user và thông tin giỏ hàng
 	user = await User.findById(req.params.userId);
 
