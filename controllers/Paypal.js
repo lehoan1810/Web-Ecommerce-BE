@@ -144,6 +144,15 @@ exports.getSuccess = catchAsync(async (req, res) => {
 	const payerId = req.query.PayerID;
 	const paymentId = req.query.paymentId;
 
+	// get api change currency
+	const exchangeUrl =
+		"https://openexchangerates.org/api/latest.json?app_id=964e2023a6b9427dbf728e0bcf1c5a9c";
+	const asyncGetRates = async () => {
+		const data = await axios.get(exchangeUrl);
+		return data.data.rates.VND;
+	};
+	const exchangeRate = await asyncGetRates();
+
 	const execute_payment_json = {
 		payer_id: payerId,
 		transactions: [
@@ -180,7 +189,7 @@ exports.getSuccess = catchAsync(async (req, res) => {
 
 				user.purchasingHistory.push({
 					items: user.cart.items,
-					totalPrice: totalPrice,
+					totalPrice: Math.round(totalPrice * exchangeRate),
 					name: name,
 					shippingAddress: shippingAddress,
 					status: 0,
