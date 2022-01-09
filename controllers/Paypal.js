@@ -53,10 +53,11 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 			currency: "USD",
 			quantity: item.qty,
 		});
-		totalPrice += item.price * item.qty;
+		totalPrice += Math.round(item.price / exchangeRate) * item.qty;
 	});
 	//convertedTotalPrice = Math.ceil(totalPrice / exchangeRate);
-	convertedTotalPrice = Math.round(totalPrice / exchangeRate);
+	convertedTotalPrice = totalPrice;
+	console.log("show converTotal: ", convertedTotalPrice);
 
 	// 4) quy định giảm giá (testing)
 	const discountObj = await Voucher.findOne({ code: req.body.code });
@@ -84,7 +85,7 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 		});
 		totalPrice -= totalPrice * (discountObj.discountPercent / 100);
 		convertedTotalPrice += discount;
-		console.log("itemss: ", itemss);
+		console.log("show converTotal lan 2: ", convertedTotalPrice);
 	}
 
 	// 5) tạo biến mẫu paypal để giao dịch có items, total là convertedItems, convertedTotalPrice đã tính ở trên
@@ -120,7 +121,8 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 	// 6) chuyển đến trang giao dịch;
 	paypal.payment.create(create_payment_json, (error, payment) => {
 		if (error) {
-			console.log("error: ", error);
+			console.log("error: ", error.response.details);
+			// console.log("error: ", error);
 			return next(new AppError("Something went wrong while paying", 400));
 			// res.render('cancel');
 		} else {
