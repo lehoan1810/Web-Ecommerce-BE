@@ -22,6 +22,8 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 	convertedTotalPrice = 0;
 	totalPrice = 0;
 
+	req.body.code = "HQHNEWYEAR10";
+
 	// 1) Lấy thông tin user và thông tin giỏ hàng
 	user = await User.findById(req.params.userId);
 
@@ -48,17 +50,18 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 		itemss.push({
 			name: item.productName,
 			sku: item.productId + "",
+			// price: Math.ceil(item.price / exchangeRate),
 			price: Math.round(item.price / exchangeRate),
 			currency: "USD",
 			quantity: item.qty,
 		});
 		totalPrice += item.price * item.qty;
 	});
+	//convertedTotalPrice = Math.ceil(totalPrice / exchangeRate);
 	convertedTotalPrice = Math.round(totalPrice / exchangeRate);
 
 	// 4) quy định giảm giá (testing)
 	const discountObj = await Voucher.findOne({ code: req.body.code });
-
 	if (req.body.code) {
 		if (!discountObj)
 			return next(
@@ -67,6 +70,9 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 					400
 				)
 			);
+		// let discount = -Math.round(
+		// 	convertedTotalPrice * (discountObj.discountPercent / 100)
+		// );
 		let discount = -Math.round(
 			convertedTotalPrice * (discountObj.discountPercent / 100)
 		);
@@ -109,9 +115,14 @@ exports.testPaypal = catchAsync(async (req, res, next) => {
 		],
 	};
 
+	console.log("totalPrice: ", totalPrice);
+	console.log("convertedTotalPrice: ", convertedTotalPrice);
+	console.log("itemss: ", itemss);
+
 	// 6) chuyển đến trang giao dịch;
 	paypal.payment.create(create_payment_json, (error, payment) => {
 		if (error) {
+			console.log("error: ", error);
 			return next(new AppError("Something went wrong while paying", 400));
 			// res.render('cancel');
 		} else {
